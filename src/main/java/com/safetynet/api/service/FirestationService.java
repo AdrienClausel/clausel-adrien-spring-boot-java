@@ -21,13 +21,13 @@ public class FirestationService {
         jsonFileRepository.writeData(dataStore);
     }
 
-    public void updateStationByAddress(String address, String newStation) {
+    public void updateStationByAddress(String address, Firestation firestation) {
         DataStore dataStore = jsonFileRepository.readData();
         Optional<Firestation> firestationExisting = dataStore.getFirestations().stream()
                 .filter(f -> f.getAddress().equalsIgnoreCase(address))
                 .findFirst();
         if (firestationExisting.isPresent()) {
-            firestationExisting.get().setStation(newStation);
+            firestationExisting.get().setStation(firestation.getStation());
         } else {
             log.error("Adresse {} non trouvé",address);
             throw new RuntimeException("Adresse non trouvé");

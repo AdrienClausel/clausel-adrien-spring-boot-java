@@ -28,13 +28,13 @@ public class FirestationController {
     /**
      * Met à jour le numéro de caserne associé à une adresse
      * @param address une adresse
-     * @param station une caserne
+     * @param fireStation une caserne
      */
     @PutMapping("/{address}")
-    public void  updateStationByAddress(@PathVariable final String address, @RequestParam final String station){
-        log.debug("Requête PUT /firestation : adresse = {}, station = {}", address, station);
-        firestationService.updateStationByAddress(address, station);
-        log.info("Modification du numéro de caserne ({}) pour l'adresse {} ", station, address);
+    public void  updateStationByAddress(@PathVariable final String address, @RequestBody final Firestation fireStation){
+        log.debug("Requête PUT /firestation/{} : {}", address, fireStation);
+        firestationService.updateStationByAddress(address, fireStation);
+        log.info("Modification du numéro de caserne ({}) pour l'adresse {} ", fireStation.getStation(), address);
     }
 
     /**
@@ -42,9 +42,9 @@ public class FirestationController {
      * @param address une adresse
      * @param station une caserne
      */
-    @DeleteMapping
-    public void deleteFirestation(@RequestParam("address") final String address, @RequestParam("station") final String station){
-        log.debug("Requête DELETE /firestation : adresse = {}, station = {}", address, station);
+    @DeleteMapping("/{address}/{station}")
+    public void deleteFirestation(@PathVariable("address") final String address, @PathVariable("station") final String station){
+        log.debug("Requête DELETE /firestation/{} : {}", address, station);
         firestationService.remove(address, station);
         log.info("Suppression de l'association caserne({})/adresse({}) ", station, address);
     }
