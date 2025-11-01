@@ -24,7 +24,7 @@ public class JsonFileRepository {
            log.debug("Lecture du fichier et copie dans le stockage des données");
            return dataStore;
         } catch (Exception e) {
-            throw new RuntimeException("Erreur de lecture du fichier Json");
+            throw new RuntimeException("Erreur de lecture du fichier Json",e);
         }
     }
 

@@ -17,15 +17,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneric(Exception e){
         log.error("Erreur interne du serveur",e);
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR,"Erreur interne du serveur");
+        //return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR,"Erreur interne du serveur");
+        return buildResponse(e);
     }
 
-    private ResponseEntity<Object> buildResponse(HttpStatus status, String message) {
+    private ResponseEntity<Object> buildResponse(Exception exception) {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
-        body.put("status", status.value());
-        body.put("error", status.getReasonPhrase());
-        body.put("message", message);
-        return new ResponseEntity<>(body, status);
+        //body.put("status", HttpStatus.INTERNAL_SERVER_ERROR);
+        body.put("error", exception.getCause().getMessage()); //status.getReasonPhrase());
+        body.put("message", exception.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
