@@ -1,6 +1,7 @@
 package com.safetynet.api.service;
 
 import com.safetynet.api.dto.ChildAlertDTO;
+import com.safetynet.api.dto.FireDTO;
 import com.safetynet.api.dto.FirestationPersonsDTO;
 import com.safetynet.api.model.Firestation;
 import com.safetynet.api.model.MedicalRecord;
@@ -15,7 +16,6 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -77,7 +77,7 @@ public class UrlService {
         return calculateAge(stringBirthdate) <= 18;
     }
 
-    public ChildAlertDTO getChildAlertByAddress(String address) {
+    public List<ChildAlertDTO> getChildAlertByAddress(String address) {
         DataStore dataStore = jsonFileRepository.readData();
         List<Person> persons = dataStore
                 .getPersons()
@@ -85,8 +85,8 @@ public class UrlService {
                 .filter(p -> p.getAddress().equalsIgnoreCase(address))
                 .toList();
 
-        List<ChildAlertDTO.ChildrenDTO> children = new ArrayList<>();
-        List<ChildAlertDTO.ChildrenDTO.HouseOtherPerson> houseOtherPerson = new ArrayList<>();
+        List<ChildAlertDTO> children = new ArrayList<>();
+        List<ChildAlertDTO.HouseOtherPerson> houseOtherPerson = new ArrayList<>();
 
         for (Person p:persons){
             Optional<MedicalRecord> medicalRecord = dataStore
@@ -100,24 +100,97 @@ public class UrlService {
 
             if (medicalRecord.isPresent()) {
                 if (isChild(medicalRecord.get().getBirthdate())){
-                    children.add(new ChildAlertDTO.ChildrenDTO(
+                    children.add(new ChildAlertDTO(
                             p.getLastName(),
                             p.getFirstName(),
                             calculateAge(medicalRecord.get().getBirthdate()),
                             houseOtherPerson
                     ));
                 } else {
-                    houseOtherPerson.add(new ChildAlertDTO.ChildrenDTO.HouseOtherPerson(p.getLastName(), p.getFirstName()));
+                    houseOtherPerson.add(new ChildAlertDTO.HouseOtherPerson(p.getLastName(), p.getFirstName()));
                 }
             }
         }
 
-        return new ChildAlertDTO(children);
+        return children;
     }
 
     private int calculateAge(String stringBirthdate){
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
         LocalDate birthDate = LocalDate.parse(stringBirthdate,dateTimeFormatter);
         return Period.between(birthDate,LocalDate.now()).getYears();
+    }
+
+    public Set<String> getPhoneAlertByStation(int station) {
+        DataStore dataStore = jsonFileRepository.readData();
+        List<String> addressFilteredByStation = dataStore
+                .getFirestations()
+                .stream()
+                .filter(f -> f.getStation().equals(String.valueOf(station)))
+                .map(Firestation::getAddress)
+                .toList();
+
+        Set<String> phones = new HashSet<>();
+
+        for (Person p: dataStore.getPersons()) {
+            if (addressFilteredByStation.contains(p.getAddress())) {
+                phones.add(p.getPhone());
+            }
+        }
+
+        return phones;
+    }
+
+    public FireDTO getPersonsAndStationByAddress(String address) {
+        DataStore dataStore = jsonFileRepository.readData();
+        List<Person> personsFilteredByAddress = dataStore
+                .getPersons()
+                .stream()
+                .filter(p -> p.getAddress().equalsIgnoreCase(address))
+                .toList();
+
+        List<FireDTO.FirePersonDTO> personsAndStationByAddress = new ArrayList<>();
+        Optional<Firestation> firestation = dataStore
+                .getFirestations()
+                .stream()
+                .filter(f -> f.getAddress().equalsIgnoreCase(address))
+                .findFirst();
+
+        String station="";
+
+        if (firestation.isPresent()) {
+            station = firestation.get().getStation();
+        }
+
+        int age = 0;
+        List<String> medications = new ArrayList<>();
+        List<String> allergies = new ArrayList<>();
+
+        for(Person p:personsFilteredByAddress){
+            Optional<MedicalRecord> medicalRecord = dataStore
+                    .getMedicalrecords()
+                    .stream()
+                    .filter(m ->
+                            m.getLastName().equalsIgnoreCase(p.getLastName())
+                            && m.getFirstName().equalsIgnoreCase(p.getFirstName())
+                    ).findFirst();
+
+            if (medicalRecord.isPresent()) {
+                age = calculateAge(medicalRecord.get().getBirthdate());
+                medications = medicalRecord.get().getMedications();
+                allergies = medicalRecord.get().getAllergies();
+            }
+
+            personsAndStationByAddress.add(
+                    new FireDTO.FirePersonDTO(
+                            p.getLastName(),
+                            p.getPhone(),
+                            age,
+                            medications,
+                            allergies
+                    )
+            );
+        }
+        return new FireDTO(personsAndStationByAddress,station);
     }
 }
