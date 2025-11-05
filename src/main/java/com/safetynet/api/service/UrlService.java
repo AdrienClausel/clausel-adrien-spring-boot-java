@@ -3,6 +3,7 @@ package com.safetynet.api.service;
 import com.safetynet.api.dto.ChildAlertDTO;
 import com.safetynet.api.dto.FireDTO;
 import com.safetynet.api.dto.FirestationPersonsDTO;
+import com.safetynet.api.dto.FloodDTO;
 import com.safetynet.api.model.Firestation;
 import com.safetynet.api.model.MedicalRecord;
 import com.safetynet.api.model.Person;
@@ -192,5 +193,51 @@ public class UrlService {
             );
         }
         return new FireDTO(personsAndStationByAddress,station);
+    }
+
+    public List<FloodDTO> getFloodByStations(List<String> stations){
+        DataStore dataStore = jsonFileRepository.readData();
+        List<FloodDTO> floods = new ArrayList<>();
+
+        List<String> addresses = dataStore
+                .getFirestations()
+                .stream()
+                .filter(f -> stations.contains(f.getStation()))
+                .map(Firestation::getAddress)
+                .toList();
+
+        for (String a:addresses){
+            List<Person> persons = dataStore
+                    .getPersons()
+                    .stream()
+                    .filter(p -> p.getAddress().equalsIgnoreCase(a))
+                    .toList();
+
+            int age = 0;
+            List<String> medications = new ArrayList<>();
+            List<String> allergies = new ArrayList<>();
+            List<FloodDTO.FloodPersonDTO> floodPersonDTO = new ArrayList<>();
+
+            for(Person p:persons){
+                Optional<MedicalRecord> medicalRecord = dataStore
+                        .getMedicalrecords()
+                        .stream()
+                        .filter(m ->
+                                m.getLastName().equalsIgnoreCase(p.getLastName())
+                                        && m.getFirstName().equalsIgnoreCase(p.getFirstName())
+                        ).findFirst();
+
+                if (medicalRecord.isPresent()) {
+                    age = calculateAge(medicalRecord.get().getBirthdate());
+                    medications = medicalRecord.get().getMedications();
+                    allergies = medicalRecord.get().getAllergies();
+                }
+
+                floodPersonDTO.add(new FloodDTO.FloodPersonDTO(p.getLastName(),p.getPhone(),age,medications,allergies));
+            }
+            floods.add(new FloodDTO(a,floodPersonDTO));
+        }
+
+        return floods;
     }
 }

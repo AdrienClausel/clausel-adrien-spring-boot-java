@@ -3,6 +3,7 @@ package com.safetynet.api.controller;
 import com.safetynet.api.dto.ChildAlertDTO;
 import com.safetynet.api.dto.FireDTO;
 import com.safetynet.api.dto.FirestationPersonsDTO;
+import com.safetynet.api.dto.FloodDTO;
 import com.safetynet.api.service.UrlService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +61,14 @@ public class UrlController {
         log.debug("Requête GET /fire");
         var result = urlService.getPersonsAndStationByAddress(address);
         log.info("Récupération d'une liste de personnes et la caserne associé pour l'adresse({})",address);
+        return result;
+    }
+
+    @GetMapping("/flood")
+    public List<FloodDTO> getFloodByStations(@RequestParam final List<String> stations){
+        log.debug("Requête GET /flood");
+        var result = urlService.getFloodByStations(stations);
+        log.info("Récupération d'une liste de foyers pour une liste de caserne ({})",stations);
         return result;
     }
 }
