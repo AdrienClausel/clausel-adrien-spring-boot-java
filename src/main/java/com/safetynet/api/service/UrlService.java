@@ -1,9 +1,6 @@
 package com.safetynet.api.service;
 
-import com.safetynet.api.dto.ChildAlertDTO;
-import com.safetynet.api.dto.FireDTO;
-import com.safetynet.api.dto.FirestationPersonsDTO;
-import com.safetynet.api.dto.FloodDTO;
+import com.safetynet.api.dto.*;
 import com.safetynet.api.model.Firestation;
 import com.safetynet.api.model.MedicalRecord;
 import com.safetynet.api.model.Person;
@@ -239,5 +236,46 @@ public class UrlService {
         }
 
         return floods;
+    }
+
+    public List<PersonInfoLastNameDTO> getPersonInfoLastName(String lastName) {
+        DataStore dataStore = jsonFileRepository.readData();
+        List<Person> persons = dataStore
+                .getPersons()
+                .stream()
+                .filter(p -> p.getLastName().equalsIgnoreCase(lastName))
+                .toList();
+
+        int age = 0;
+        List<String> medications = new ArrayList<>();
+        List<String> allergies = new ArrayList<>();
+        List<PersonInfoLastNameDTO> personInfoLastName = new ArrayList<>();
+
+        for (Person p:persons){
+            Optional<MedicalRecord> medicalRecord = dataStore
+                    .getMedicalrecords()
+                    .stream()
+                    .filter(m ->
+                            m.getLastName().equalsIgnoreCase(p.getLastName())
+                                    && m.getFirstName().equalsIgnoreCase(p.getFirstName())
+                    ).findFirst();
+
+            if (medicalRecord.isPresent()) {
+                age = calculateAge(medicalRecord.get().getBirthdate());
+                medications = medicalRecord.get().getMedications();
+                allergies = medicalRecord.get().getAllergies();
+                personInfoLastName.add(
+                        new PersonInfoLastNameDTO(
+                            p.getLastName(),
+                            p.getAddress(),
+                            age,
+                            p.getEmail(),
+                            medications,
+                            allergies
+                        )
+                );
+            }
+        }
+        return personInfoLastName;
     }
 }
