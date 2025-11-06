@@ -278,4 +278,16 @@ public class UrlService {
         }
         return personInfoLastName;
     }
+
+    public List<String> getPersonsEmailByCity(String city) {
+        DataStore dataStore = jsonFileRepository.readData();
+
+        return dataStore
+                .getPersons()
+                .stream()
+                .filter(p -> p.getCity().equalsIgnoreCase(city))
+                .map(Person::getEmail)
+                .distinct()
+                .toList();
+    }
 }

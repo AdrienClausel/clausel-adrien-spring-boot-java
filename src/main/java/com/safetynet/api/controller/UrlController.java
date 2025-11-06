@@ -76,4 +76,12 @@ public class UrlController {
         log.info("Récupération d'une liste de personnes portant le nom ({})",lastName);
         return result;
     }
+
+    @GetMapping("/communityEmail")
+    public List<String> getPersonsEmailByCity(@RequestParam final String city){
+        log.debug("Requête GET /communityEmail");
+        var result = urlService.getPersonsEmailByCity(city);
+        log.info("Récupération d'une liste de mails des habitants de la ville({})",city);
+        return result;
+    }
 }
