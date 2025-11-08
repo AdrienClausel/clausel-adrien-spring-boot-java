@@ -128,7 +128,7 @@ public class UrlService {
                 .map(Firestation::getAddress)
                 .toList();
 
-        Set<String> phones = new HashSet<>();
+        Set<String> phones = new LinkedHashSet<>();
 
         for (Person p: dataStore.getPersons()) {
             if (addressFilteredByStation.contains(p.getAddress())) {
