@@ -29,8 +29,8 @@ public class FirestationService {
         if (firestationExisting.isPresent()) {
             firestationExisting.get().setStation(firestation.getStation());
         } else {
-            log.error("Adresse {} non trouvé",address);
-            throw new RuntimeException("Adresse non trouvé");
+            log.error("Adresse {} non trouvée",address);
+            throw new RuntimeException("Adresse non trouvée");
         }
         jsonFileRepository.writeData(dataStore);
     }
@@ -43,6 +43,7 @@ public class FirestationService {
                     f.getStation().equalsIgnoreCase(station)
             );
         if (!removed) {
+            log.error("Adresse {} non trouvée",address);
             throw new RuntimeException("Adresse non trouvée");
         }
         jsonFileRepository.writeData(dataStore);
