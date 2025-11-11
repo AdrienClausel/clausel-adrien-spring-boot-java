@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -56,7 +55,7 @@ public class FirestationServiceTest {
 
         when(jsonFileRepository.readData()).thenReturn(dataStore);
 
-        firestationService.updateStationByAddress("chemin des falaises",updateFireStation);
+        firestationService.updateStationByAddress(address,updateFireStation);
 
         assertEquals(updateFireStation.getStation(), dataStore.getFirestations().getFirst().getStation());
         verify(jsonFileRepository).writeData(dataStore);

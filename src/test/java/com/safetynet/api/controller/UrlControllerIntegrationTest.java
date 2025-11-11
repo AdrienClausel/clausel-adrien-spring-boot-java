@@ -69,7 +69,7 @@ public class UrlControllerIntegrationTest {
         when(urlService.getChildAlertByAddress(eq(address))).thenReturn(dto);
 
         mockMvc.perform(get("/childAlert")
-            .param("address",String.valueOf(address)))
+            .param("address",address))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.[0].lastName").value("prost"))
             .andExpect(jsonPath("$.[0].firstName").value("alain"))
@@ -89,7 +89,7 @@ public class UrlControllerIntegrationTest {
         when(urlService.getChildAlertByAddress(eq(address))).thenReturn(dto);
 
         mockMvc.perform(get("/childAlert")
-            .param("address",String.valueOf(address)))
+            .param("address",address))
             .andExpect(status().isOk())
             .andExpect(content().string(""));
 
@@ -135,7 +135,7 @@ public class UrlControllerIntegrationTest {
         when(urlService.getPersonsAndStationByAddress(eq(address))).thenReturn(dto);
 
         mockMvc.perform(get("/fire")
-            .param("address",String.valueOf(address)))
+            .param("address",address))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.persons[0].lastName").value("prost"))
             .andExpect(jsonPath("$.persons[0].phone").value("0489321245"))

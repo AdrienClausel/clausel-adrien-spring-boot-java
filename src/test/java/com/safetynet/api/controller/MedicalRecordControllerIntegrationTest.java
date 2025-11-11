@@ -1,8 +1,6 @@
 package com.safetynet.api.controller;
 
-import com.safetynet.api.model.Firestation;
 import com.safetynet.api.model.MedicalRecord;
-import com.safetynet.api.service.FirestationService;
 import com.safetynet.api.service.MedicalRecordService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

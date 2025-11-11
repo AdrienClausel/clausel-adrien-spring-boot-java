@@ -4,10 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
 import java.io.File;
 import org.springframework.beans.factory.annotation.Value;
 
+/**
+ * Classe de gestion de la couche repository avec accès à un fichier Json comme source de données
+ */
 @Slf4j
 @Component
 public class JsonFileRepository {
@@ -16,6 +18,10 @@ public class JsonFileRepository {
     private String dataFileName;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    /**
+     * Lecture des données depuis de fichier Json
+     * @return DataStore objet contenant les données du fichier Json
+     */
     public DataStore readData() {
        try {
            File file = new File(dataFileName);
@@ -28,6 +34,10 @@ public class JsonFileRepository {
         }
     }
 
+    /**
+     * Ecriture des données dans le fichier Json
+     * @param dataStore objet contenant les données à ecrire dans le fichier Json
+     */
     public void writeData(DataStore dataStore){
         try {
             File file = new File(dataFileName);

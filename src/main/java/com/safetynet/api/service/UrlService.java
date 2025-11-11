@@ -9,12 +9,14 @@ import com.safetynet.api.repository.JsonFileRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+/**
+ * Service des gestions des extractions de données
+ */
 @Slf4j
 @Service
 public class UrlService {
@@ -22,6 +24,11 @@ public class UrlService {
     @Autowired
     private JsonFileRepository jsonFileRepository;
 
+    /**
+     * Retourne une liste de personnes couvertes par une caserne
+     * @param station caserne
+     * @return liste de personne avec nom, prénom, adresse, numéro de téléphone avec un total des adultes et des mineurs
+     */
     public FirestationPersonsDTO getPersonsByStation(final int station){
         DataStore dataStore = jsonFileRepository.readData();
         List<String> addressFilteredByStation = dataStore
@@ -30,12 +37,6 @@ public class UrlService {
                 .filter(f -> f.getStation().equals(String.valueOf(station)))
                 .map(Firestation::getAddress)
                 .toList();
-
-        FirestationPersonsDTO firestationPersonsDTO = new FirestationPersonsDTO(
-                new ArrayList<FirestationPersonsDTO.PersonDTO>(),
-                0,
-                0
-        );
 
         List<FirestationPersonsDTO.PersonDTO> persons = new ArrayList<>();
         long childCount = 0;
@@ -75,6 +76,11 @@ public class UrlService {
         return calculateAge(stringBirthdate) <= 18;
     }
 
+    /**
+     * Retourne une liste d'enfants habitant à une adresse avec leur prénom, nom, âge et la liste des autres habitants du foyer
+     * @param address adresse
+     * @return une liste de personne mineure avec nom, prénom, âge et les autres membres de leur foyer
+     */
     public List<ChildAlertDTO> getChildAlertByAddress(String address) {
         DataStore dataStore = jsonFileRepository.readData();
         List<Person> persons = dataStore
@@ -113,12 +119,22 @@ public class UrlService {
         return children;
     }
 
+    /**
+     * Renvoi un âge à partir d'une date de naissance au format chaîne
+     * @param stringBirthdate Date de naissance au format chaîne
+     * @return âge
+     */
     private int calculateAge(String stringBirthdate){
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
         LocalDate birthDate = LocalDate.parse(stringBirthdate,dateTimeFormatter);
         return Period.between(birthDate,LocalDate.now()).getYears();
     }
 
+    /**
+     * Retourne une liste des numéros de téléphone des habitants liés à une caserne
+     * @param station caserne
+     * @return liste de numéro de téléphone
+     */
     public Set<String> getPhoneAlertByStation(int station) {
         DataStore dataStore = jsonFileRepository.readData();
         List<String> addressFilteredByStation = dataStore
@@ -139,6 +155,11 @@ public class UrlService {
         return phones;
     }
 
+    /**
+     * Retourne une liste d'habitants vivant à une adresse avec leurs noms, numéros de téléphone, age, dossier médical et leur caserne
+     * @param address adresse
+     * @return liste de personnes avec dossier médical
+     */
     public FireDTO getPersonsAndStationByAddress(String address) {
         DataStore dataStore = jsonFileRepository.readData();
         List<Person> personsFilteredByAddress = dataStore
@@ -192,6 +213,11 @@ public class UrlService {
         return new FireDTO(personsAndStationByAddress,station);
     }
 
+    /**
+     * Retourne la liste des foyers liés à une liste de caserne avec leurs numéros de téléphone, age et dossier médical
+     * @param stations liste de casernes
+     * @return liste de personnes avec dossier médical
+     */
     public List<FloodDTO> getFloodByStations(List<String> stations){
         DataStore dataStore = jsonFileRepository.readData();
         List<FloodDTO> floods = new ArrayList<>();
@@ -238,6 +264,11 @@ public class UrlService {
         return floods;
     }
 
+    /**
+     * Retour la liste des personnes et leur dossier medical qui porte un nom
+     * @param lastName nom
+     * @return liste de personnes avec dossier medical
+     */
     public List<PersonInfoLastNameDTO> getPersonInfoLastName(String lastName) {
         DataStore dataStore = jsonFileRepository.readData();
         List<Person> persons = dataStore
@@ -246,9 +277,9 @@ public class UrlService {
                 .filter(p -> p.getLastName().equalsIgnoreCase(lastName))
                 .toList();
 
-        int age = 0;
-        List<String> medications = new ArrayList<>();
-        List<String> allergies = new ArrayList<>();
+        int age;
+        List<String> medications;
+        List<String> allergies;
         List<PersonInfoLastNameDTO> personInfoLastName = new ArrayList<>();
 
         for (Person p:persons){
@@ -279,6 +310,11 @@ public class UrlService {
         return personInfoLastName;
     }
 
+    /**
+     * Retourne la liste des emails des personnes vivant dans une ville
+     * @param city
+     * @return liste d'emails
+     */
     public List<String> getPersonsEmailByCity(String city) {
         DataStore dataStore = jsonFileRepository.readData();
 
