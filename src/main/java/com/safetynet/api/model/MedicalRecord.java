@@ -1,11 +1,13 @@
 package com.safetynet.api.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.util.Date;
+import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class MedicalRecord {
     public String firstName;
     public String lastName;
