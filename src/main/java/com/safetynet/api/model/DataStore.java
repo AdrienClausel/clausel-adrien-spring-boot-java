@@ -1,9 +1,6 @@
-package com.safetynet.api.repository;
+package com.safetynet.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.safetynet.api.model.Firestation;
-import com.safetynet.api.model.MedicalRecord;
-import com.safetynet.api.model.Person;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -4,7 +4,8 @@ import com.safetynet.api.dto.*;
 import com.safetynet.api.model.Firestation;
 import com.safetynet.api.model.MedicalRecord;
 import com.safetynet.api.model.Person;
-import com.safetynet.api.repository.DataStore;
+import com.safetynet.api.model.DataStore;
+import com.safetynet.api.repository.IUrlRepository;
 import com.safetynet.api.repository.JsonFileRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +23,7 @@ import static org.mockito.Mockito.when;
 public class UrlServiceTest {
 
     @Mock
-    private JsonFileRepository jsonFileRepository;
+    private IUrlRepository urlRepository;
 
     @InjectMocks
     private UrlService urlService;
@@ -39,12 +40,12 @@ public class UrlServiceTest {
 
         DataStore dataStore = new DataStore(List.of(firestation), List.of(adult,child), List.of(adultRecord,childRecord));
 
-        when(jsonFileRepository.readData()).thenReturn(dataStore);
+        when(urlRepository.readData()).thenReturn(dataStore);
 
         FirestationPersonsDTO result = urlService.getPersonsByStation(4);
 
         assertEquals("prost",result.persons().getFirst().lastName());
-        verify(jsonFileRepository).readData();
+        verify(urlRepository).readData();
     }
 
     @Test
@@ -57,13 +58,13 @@ public class UrlServiceTest {
 
         DataStore dataStore = new DataStore(List.of(),List.of(adult,child),List.of(adultRecord,childRecord));
 
-        when(jsonFileRepository.readData()).thenReturn(dataStore);
+        when(urlRepository.readData()).thenReturn(dataStore);
 
         List<ChildAlertDTO> result = urlService.getChildAlertByAddress("13 chemin de la mer");
 
         assertEquals("axel",result.getFirst().firstName());
         assertEquals("alain",result.getFirst().houseOtherPerson().getFirst().firstName());
-        verify(jsonFileRepository).readData();
+        verify(urlRepository).readData();
     }
 
     @Test
@@ -75,13 +76,13 @@ public class UrlServiceTest {
 
         DataStore dataStore = new DataStore(List.of(firestation),List.of(adult,child),List.of());
 
-        when(jsonFileRepository.readData()).thenReturn(dataStore);
+        when(urlRepository.readData()).thenReturn(dataStore);
 
         Set<String> result = urlService.getPhoneAlertByStation(4);
 
         assertEquals(1, result.size());
         assertTrue(result.contains("0490251246"));
-        verify(jsonFileRepository).readData();
+        verify(urlRepository).readData();
     }
 
     @Test
@@ -98,13 +99,13 @@ public class UrlServiceTest {
 
         DataStore dataStore = new DataStore(List.of(firestation),List.of(adult,child),List.of(adultRecord,childRecord));
 
-        when(jsonFileRepository.readData()).thenReturn(dataStore);
+        when(urlRepository.readData()).thenReturn(dataStore);
 
         FireDTO result = urlService.getPersonsAndStationByAddress(address);
 
         assertEquals("4", result.station());
         assertEquals("aznol:350mg", result.persons().getFirst().medications().getFirst());
-        verify(jsonFileRepository).readData();
+        verify(urlRepository).readData();
     }
 
     @Test
@@ -122,14 +123,14 @@ public class UrlServiceTest {
 
         DataStore dataStore = new DataStore(List.of(firestation1,firestation2),List.of(person1,person2),List.of(person1Record,person2Record));
 
-        when(jsonFileRepository.readData()).thenReturn(dataStore);
+        when(urlRepository.readData()).thenReturn(dataStore);
 
         List<FloodDTO> result = urlService.getFloodByStations(stations);
 
         assertEquals("13 chemin de la mer",result.getFirst().address());
         assertEquals("prost",result.getFirst().persons().getFirst().lastName());
 
-        verify(jsonFileRepository).readData();
+        verify(urlRepository).readData();
     }
 
     @Test
@@ -144,14 +145,14 @@ public class UrlServiceTest {
 
         DataStore dataStore = new DataStore(List.of(),List.of(person1,person2),List.of(person1Record,person2Record));
 
-        when(jsonFileRepository.readData()).thenReturn(dataStore);
+        when(urlRepository.readData()).thenReturn(dataStore);
 
         List<PersonInfoLastNameDTO> result = urlService.getPersonInfoLastName(lastName);
 
         assertEquals(2,result.size());
         assertEquals("xilliathal", result.get(1).allergies().getFirst());
 
-        verify(jsonFileRepository).readData();
+        verify(urlRepository).readData();
     }
 
     @Test
@@ -163,14 +164,14 @@ public class UrlServiceTest {
 
         DataStore dataStore = new DataStore(List.of(),List.of(person1,person2),List.of());
 
-        when(jsonFileRepository.readData()).thenReturn(dataStore);
+        when(urlRepository.readData()).thenReturn(dataStore);
 
         List<String> result = urlService.getPersonsEmailByCity(city);
 
         assertEquals(2,result.size());
         assertEquals("axel.prost@email.fr",result.get(1));
 
-        verify(jsonFileRepository).readData();
+        verify(urlRepository).readData();
     }
 
 }

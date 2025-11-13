@@ -1,12 +1,10 @@
 package com.safetynet.api.service;
 
 import com.safetynet.api.model.Person;
-import com.safetynet.api.repository.DataStore;
-import com.safetynet.api.repository.JsonFileRepository;
+import com.safetynet.api.repository.IPersonRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.Optional;
 
 /**
  * Service de gestions des personnes
@@ -16,16 +14,14 @@ import java.util.Optional;
 public class PersonService {
 
     @Autowired
-    private JsonFileRepository jsonFileRepository;
+    private IPersonRepository personRepository;
 
     /**
      * Insère une nouvelle personne
      * @param person personne
      */
     public void add(Person person) {
-        DataStore dataStore = jsonFileRepository.readData();
-        dataStore.getPersons().add(person);
-        jsonFileRepository.writeData(dataStore);
+        personRepository.add(person);
     }
 
     /**
@@ -36,26 +32,12 @@ public class PersonService {
      * @param person personne
      */
     public void updateByLastNameAndFirstName(String lastName, String firstName ,Person person){
-        DataStore dataStore = jsonFileRepository.readData();
-        Optional<Person> personExisting = dataStore
-                .getPersons()
-                .stream()
-                .filter(p ->
-                        p.getLastName().equalsIgnoreCase(lastName)
-                        && p.getFirstName().equalsIgnoreCase(firstName)
-                        )
-                .findFirst();
-        if (personExisting.isPresent()) {
-            personExisting.get().setAddress(person.getAddress());
-            personExisting.get().setZip(person.getZip());
-            personExisting.get().setCity(person.getCity());
-            personExisting.get().setEmail(person.getEmail());
-            personExisting.get().setPhone(person.getPhone());
-        } else {
+        boolean updated = personRepository.updateByLastNameAndFirstName(lastName,firstName,person);
+
+        if (!updated) {
             log.error("Personne {}/{} non trouvé",lastName, firstName);
             throw new RuntimeException("Personne non trouvée");
         }
-        jsonFileRepository.writeData(dataStore);
     }
 
     /**
@@ -65,14 +47,11 @@ public class PersonService {
      * @param firstName prénom
      */
     public void deleteByLastNameAndFirstName(String lastName, String firstName){
-        DataStore dataStore = jsonFileRepository.readData();
-        boolean removed = dataStore.getPersons().removeIf(p ->
-                p.lastName.equalsIgnoreCase(lastName)
-                && p.firstName.equalsIgnoreCase(firstName)
-                );
-        if (!removed){
+        boolean deleted = personRepository.deleteByLastNameAndFirstName(lastName,firstName);
+
+        if (!deleted) {
+            log.error("Personne {}/{} non trouvé",lastName, firstName);
             throw new RuntimeException("Personne non trouvée");
         }
-        jsonFileRepository.writeData(dataStore);
     }
 }
