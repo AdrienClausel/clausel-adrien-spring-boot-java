@@ -4,7 +4,8 @@ import com.safetynet.api.dto.*;
 import com.safetynet.api.model.Firestation;
 import com.safetynet.api.model.MedicalRecord;
 import com.safetynet.api.model.Person;
-import com.safetynet.api.repository.DataStore;
+import com.safetynet.api.model.DataStore;
+import com.safetynet.api.repository.IUrlRepository;
 import com.safetynet.api.repository.JsonFileRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ import java.util.*;
 public class UrlService {
 
     @Autowired
-    private JsonFileRepository jsonFileRepository;
+    private IUrlRepository urlRepository;
 
     /**
      * Retourne une liste de personnes couvertes par une caserne
@@ -30,7 +31,7 @@ public class UrlService {
      * @return liste de personne avec nom, prénom, adresse, numéro de téléphone avec un total des adultes et des mineurs
      */
     public FirestationPersonsDTO getPersonsByStation(final int station){
-        DataStore dataStore = jsonFileRepository.readData();
+        DataStore dataStore = urlRepository.readData();
         List<String> addressFilteredByStation = dataStore
                 .getFirestations()
                 .stream()
@@ -82,7 +83,7 @@ public class UrlService {
      * @return une liste de personne mineure avec nom, prénom, âge et les autres membres de leur foyer
      */
     public List<ChildAlertDTO> getChildAlertByAddress(String address) {
-        DataStore dataStore = jsonFileRepository.readData();
+        DataStore dataStore = urlRepository.readData();
         List<Person> persons = dataStore
                 .getPersons()
                 .stream()
@@ -136,7 +137,7 @@ public class UrlService {
      * @return liste de numéro de téléphone
      */
     public Set<String> getPhoneAlertByStation(int station) {
-        DataStore dataStore = jsonFileRepository.readData();
+        DataStore dataStore = urlRepository.readData();
         List<String> addressFilteredByStation = dataStore
                 .getFirestations()
                 .stream()
@@ -161,7 +162,7 @@ public class UrlService {
      * @return liste de personnes avec dossier médical
      */
     public FireDTO getPersonsAndStationByAddress(String address) {
-        DataStore dataStore = jsonFileRepository.readData();
+        DataStore dataStore = urlRepository.readData();
         List<Person> personsFilteredByAddress = dataStore
                 .getPersons()
                 .stream()
@@ -219,7 +220,7 @@ public class UrlService {
      * @return liste de personnes avec dossier médical
      */
     public List<FloodDTO> getFloodByStations(List<String> stations){
-        DataStore dataStore = jsonFileRepository.readData();
+        DataStore dataStore = urlRepository.readData();
         List<FloodDTO> floods = new ArrayList<>();
 
         List<String> addresses = dataStore
@@ -270,7 +271,7 @@ public class UrlService {
      * @return liste de personnes avec dossier medical
      */
     public List<PersonInfoLastNameDTO> getPersonInfoLastName(String lastName) {
-        DataStore dataStore = jsonFileRepository.readData();
+        DataStore dataStore = urlRepository.readData();
         List<Person> persons = dataStore
                 .getPersons()
                 .stream()
@@ -316,7 +317,7 @@ public class UrlService {
      * @return liste d'emails
      */
     public List<String> getPersonsEmailByCity(String city) {
-        DataStore dataStore = jsonFileRepository.readData();
+        DataStore dataStore = urlRepository.readData();
 
         return dataStore
                 .getPersons()

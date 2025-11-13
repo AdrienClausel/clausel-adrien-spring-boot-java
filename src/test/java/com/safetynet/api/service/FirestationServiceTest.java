@@ -1,8 +1,7 @@
 package com.safetynet.api.service;
 
 import com.safetynet.api.model.Firestation;
-import com.safetynet.api.repository.DataStore;
-import com.safetynet.api.repository.JsonFileRepository;
+import com.safetynet.api.repository.IFirestationRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -14,116 +13,74 @@ import static org.mockito.Mockito.*;
 public class FirestationServiceTest {
 
     @Mock
-    private JsonFileRepository jsonFileRepository;
+    private IFirestationRepository firestationRepository;
 
     @InjectMocks
     private FirestationService firestationService;
 
     @Test
-    public void add_shouldAddAndWriteData(){
-        Firestation newFireStation = new Firestation();
-        newFireStation.setAddress("38 rue du clocher");
-        newFireStation.setStation("3");
-
-        DataStore dataStore = new DataStore();
-        Firestation fireStation = new Firestation();
-        fireStation.setAddress("chemin des falaises");
-        fireStation.setStation("1");
-        dataStore.getFirestations().add(fireStation);
-
-        when(jsonFileRepository.readData()).thenReturn(dataStore);
+    public void testAdd_shouldCallRepository(){
+        Firestation newFireStation = new Firestation("38 rue du clocher","3");
 
         firestationService.add(newFireStation);
 
-        assertEquals(newFireStation.getAddress(), dataStore.getFirestations().get(1).getAddress());
-        verify(jsonFileRepository).writeData(dataStore);
+        verify(firestationRepository,times(1)).add(newFireStation);
     }
 
     @Test
-    public void updateStationByAddress_existingAddress_shouldUpdateAndWriteData(){
+    public void testUpdateStationByAddress_existingAddress_shouldSuccess(){
         String address = "chemin des falaises";
 
-        Firestation updateFireStation = new Firestation();
-        updateFireStation.setAddress("chemin des falaises");
-        updateFireStation.setStation("3");
+        Firestation updateFireStation = new Firestation(address,"2");
 
-        DataStore dataStore = new DataStore();
-        Firestation fireStation = new Firestation();
-        fireStation.setAddress("chemin des falaises");
-        fireStation.setStation("1");
-        dataStore.getFirestations().add(fireStation);
-
-        when(jsonFileRepository.readData()).thenReturn(dataStore);
+        when(firestationRepository.updateStationByAddress(address,updateFireStation)).thenReturn(true);
 
         firestationService.updateStationByAddress(address,updateFireStation);
 
-        assertEquals(updateFireStation.getStation(), dataStore.getFirestations().getFirst().getStation());
-        verify(jsonFileRepository).writeData(dataStore);
+        verify(firestationRepository,times(1)).updateStationByAddress(address,updateFireStation);
     }
 
     @Test
-    public void updateStationByAddress_addressNotFound_shouldThrowsException(){
-        String address = "chemin des pins";
+    public void testUpdateStationByAddress_addressNotFound_shouldThrowsException(){
+        String address = "chemin des falaises";
 
-        Firestation updateFireStation = new Firestation();
-        updateFireStation.setAddress("chemin des falaises");
-        updateFireStation.setStation("3");
+        Firestation updateFireStation = new Firestation(address,"3");
 
-        DataStore dataStore = new DataStore();
-        Firestation fireStation = new Firestation();
-        fireStation.setAddress("chemin des falaises");
-        fireStation.setStation("1");
-        dataStore.getFirestations().add(fireStation);
 
-        when(jsonFileRepository.readData()).thenReturn(dataStore);
+        when(firestationRepository.updateStationByAddress(address,updateFireStation)).thenReturn(false);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
                 firestationService.updateStationByAddress(address,updateFireStation)
         );
 
         assertEquals("Adresse non trouvée", exception.getMessage());
-        assertNotEquals(updateFireStation.getStation(), dataStore.getFirestations().getFirst().getStation());
-        verify(jsonFileRepository, never()).writeData(dataStore);
+        verify(firestationRepository, times(1)).updateStationByAddress(address,updateFireStation);
     }
 
     @Test
-    public void remove_existingAddress_shouldRemoveAndWriteData(){
+    public void testRemove_existingAddress_shouldSuccess(){
         String address = "chemin des falaises";
         String station = "1";
 
-        DataStore dataStore = new DataStore();
-        Firestation fireStation = new Firestation();
-        fireStation.setAddress("chemin des falaises");
-        fireStation.setStation("1");
-        dataStore.getFirestations().add(fireStation);
-
-        when(jsonFileRepository.readData()).thenReturn(dataStore);
+        when(firestationRepository.remove(address,station)).thenReturn(true);
 
         firestationService.remove(address,station);
 
-        assertEquals(0, dataStore.getFirestations().size());
-        verify(jsonFileRepository).writeData(dataStore);
+        verify(firestationRepository,times(1)).remove(address,station);
     }
 
     @Test
-    public void remove_addressNotFound_shouldThrowException(){
-        String address = "chemin des pins";
+    public void testRemove_addressNotFound_shouldThrowException(){
+        String address = "chemin des falaises";
         String station = "1";
 
-        DataStore dataStore = new DataStore();
-        Firestation fireStation = new Firestation();
-        fireStation.setAddress("chemin des falaises");
-        fireStation.setStation("1");
-        dataStore.getFirestations().add(fireStation);
-
-        when(jsonFileRepository.readData()).thenReturn(dataStore);
+        when(firestationRepository.remove(address,station)).thenReturn(false);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
                 firestationService.remove(address,station)
         );
 
         assertEquals("Adresse non trouvée", exception.getMessage());
-        assertEquals(1, dataStore.getFirestations().size());
-        verify(jsonFileRepository, never()).writeData(dataStore);
+        verify(firestationRepository,times(1)).remove(address,station);
     }
 }

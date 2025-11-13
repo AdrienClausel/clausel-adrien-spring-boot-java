@@ -1,7 +1,8 @@
 package com.safetynet.api.service;
 
 import com.safetynet.api.model.Firestation;
-import com.safetynet.api.repository.DataStore;
+import com.safetynet.api.model.DataStore;
+import com.safetynet.api.repository.IFirestationRepository;
 import com.safetynet.api.repository.JsonFileRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,16 +17,14 @@ import java.util.Optional;
 public class FirestationService {
 
     @Autowired
-    private JsonFileRepository jsonFileRepository;
+    private IFirestationRepository firestationRepository;
 
     /**
      * Insère une nouvelle association caserne/adresse
      * @param firestation association caserne/adresse
      */
     public void add(Firestation firestation) {
-        DataStore dataStore = jsonFileRepository.readData();
-        dataStore.getFirestations().add(firestation);
-        jsonFileRepository.writeData(dataStore);
+        firestationRepository.add(firestation);
     }
 
     /**
@@ -35,17 +34,12 @@ public class FirestationService {
      * @param firestation objet caserne/adresse
      */
     public void updateStationByAddress(String address, Firestation firestation) {
-        DataStore dataStore = jsonFileRepository.readData();
-        Optional<Firestation> firestationExisting = dataStore.getFirestations().stream()
-                .filter(f -> f.getAddress().equalsIgnoreCase(address))
-                .findFirst();
-        if (firestationExisting.isPresent()) {
-            firestationExisting.get().setStation(firestation.getStation());
-        } else {
+        boolean updated = firestationRepository.updateStationByAddress(address,firestation);
+
+        if (!updated) {
             log.error("Adresse {} non trouvée",address);
             throw new RuntimeException("Adresse non trouvée");
         }
-        jsonFileRepository.writeData(dataStore);
     }
 
     /**
@@ -55,16 +49,11 @@ public class FirestationService {
      * @param station caserne
      */
     public void remove(String address, String station) {
-        DataStore dataStore = jsonFileRepository.readData();
-        boolean removed = dataStore.getFirestations()
-            .removeIf(f ->
-                    f.getAddress().equalsIgnoreCase(address) &&
-                    f.getStation().equalsIgnoreCase(station)
-            );
-        if (!removed) {
+        boolean removed = firestationRepository.remove(address,station);
+
+        if (!removed){
             log.error("Adresse {} non trouvée",address);
             throw new RuntimeException("Adresse non trouvée");
         }
-        jsonFileRepository.writeData(dataStore);
     }
 }
